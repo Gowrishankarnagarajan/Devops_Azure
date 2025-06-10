@@ -3,16 +3,14 @@ name: Terraform Azure WebApp CI/CD
 on:
   push:
     branches:
-      - main 
-      - Devops # Adjust branches as needed   
-  pull_request:
+      - main
+      - Devops
+
 
 jobs:
   terraform:
-    name: Build Azure Infrastructure
+    name: Terraform Plan & Apply
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -20,34 +18,20 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.4.2
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
+      - name: Terraform Init
+        run: terraform init
+
       - name: Terraform Format
-        id: fmt
         run: terraform fmt
 
-      - name: Terraform Init
-        id: init
-        run: terraform init
-      
       - name: Terraform Validate
-        id: validate
         run: terraform validate
 
       - name: Terraform Plan
-        id: plan
         run: terraform plan -input=false
 
-      - name: Terraform Plan Status
-        if: failure()
-        run: echo "Terraform plan failed."
-
       - name: Terraform Apply
-        id: apply
-        if: steps.plan.outcome == 'success'
-        run: terraform apply -input=false
-        continue-on-error: true
-      - name: Terraform Apply Status
-        if: steps.apply.outcome == 'failure'
-        run: echo "Terraform apply failed." 
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' )
+        run: terraform apply -auto-approve -input=false
