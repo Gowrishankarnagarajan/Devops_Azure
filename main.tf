@@ -33,23 +33,26 @@ resource "azurerm_linux_web_app" "frontend" {
   name                = "frontend-webapp-${random_id.frontend.hex}"
   location            = azurerm_resource_group.gs.location
   resource_group_name = azurerm_resource_group.gs.name
-  service_plan_id = azurerm_app_service_plan.gs.id
-  site_config {
-    linux_fx_version = "wordpress|6.0"
-  }
-}
+  service_plan_id     = azurerm_app_service_plan.gs.id
 
+  site_config {
+    always_on = false
+  }
+} 
 resource "azurerm_linux_web_app" "backend" {
   name                = "backend-webapp-${random_id.backend.hex}"
   location            = azurerm_resource_group.gs.location
   resource_group_name = azurerm_resource_group.gs.name
-  service_plan_id = azurerm_app_service_plan.gs.id
+  service_plan_id     = azurerm_app_service_plan.gs.id
 
-  # Add deployment config if needed
   site_config {
-    linux_fx_version = "java|11-java11"
+    always_on = false
   }
 }
+
+ 
+# Generate random IDs for unique web app names
+# This ensures that the web app names are unique across Azure.
 
 resource "random_id" "frontend" {
   byte_length = 4
