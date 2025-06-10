@@ -35,18 +35,6 @@ resource "azurerm_app_service" "frontend" {
   resource_group_name = azurerm_resource_group.gs.name
   app_service_plan_id = azurerm_app_service_plan.gs.id
   
-
-
-  app_settings = {
-    "WEBSITE_RUN_FROM_PACKAGE" = "1"
-  }
-
-  # Use only source_control for GitHub integration
-  source_control {
-    repo_url           = "https://github.com/Gowrishankarnagarajan/Invitation.git"
-    branch             = "main"
-    manual_integration = true
-  }
 }
 
 resource "azurerm_app_service" "backend" {
