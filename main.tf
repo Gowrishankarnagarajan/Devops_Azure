@@ -10,10 +10,6 @@ terraform {
 }
 
 
-provider "azurerm" {
-  features {}
-}
-
 resource "azurerm_resource_group" "gs" {
   name     = "example-webapp-rg"
   location = "West Europe"
