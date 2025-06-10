@@ -7,7 +7,3 @@ provider "azurerm" {
   tenant_id       = var.tenant_id
   features {}
 }
-
-provider "github" {
-  token = var.GITHUB_TOKEN
-}
