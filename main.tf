@@ -1,3 +1,4 @@
+# This Terraform configuration sets up an Azure App Service with a resource group, app service plan, and two web apps (frontend and backend).
 terraform { 
   cloud { 
     
@@ -20,6 +21,7 @@ resource "azurerm_app_service_plan" "gs" {
   name                = "azurerm_service_plan"
   location            = azurerm_resource_group.gs.location
   resource_group_name = azurerm_resource_group.gs.name
+  reserved            = true 
   sku {
     tier = "Free"
     size = "F1"
@@ -33,6 +35,7 @@ resource "azurerm_app_service" "frontend" {
   resource_group_name = azurerm_resource_group.gs.name
   app_service_plan_id = azurerm_app_service_plan.gs.id
   
+
 
   app_settings = {
     "WEBSITE_RUN_FROM_PACKAGE" = "1"
@@ -61,4 +64,4 @@ resource "random_id" "frontend" {
 
 resource "random_id" "backend" {
   byte_length = 4
-}
+} 
