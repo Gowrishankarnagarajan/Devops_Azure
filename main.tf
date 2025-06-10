@@ -16,19 +16,23 @@ resource "azurerm_resource_group" "gs" {
 }
 
 # Use the new resource type
-resource "azurerm_service_plan" "gs" {
-  name                = "example-appserviceplan"
+resource "azurerm_app_service_plan" "gs" {
+  name                = "azurerm_service_plan"
   location            = azurerm_resource_group.gs.location
   resource_group_name = azurerm_resource_group.gs.name
-  os_type             = "Linux"
-  sku_name            = "F1"
+  sku {
+    tier = "Free"
+    size = "F1"
+  }
+  kind = "Linux"
 }
 
 resource "azurerm_app_service" "frontend" {
   name                = "frontend-webapp-${random_id.frontend.hex}"
   location            = azurerm_resource_group.gs.location
   resource_group_name = azurerm_resource_group.gs.name
-  app_service_plan_id = azurerm_service_plan.gs.id
+  app_service_plan_id = azurerm_app_service_plan.gs.id
+  
 
   app_settings = {
     "WEBSITE_RUN_FROM_PACKAGE" = "1"
@@ -46,7 +50,7 @@ resource "azurerm_app_service" "backend" {
   name                = "backend-webapp-${random_id.backend.hex}"
   location            = azurerm_resource_group.gs.location
   resource_group_name = azurerm_resource_group.gs.name
-  app_service_plan_id = azurerm_service_plan.gs.id
+  app_service_plan_id = azurerm_app_service_plan.gs.id
 
   # Add deployment config if needed
 }
