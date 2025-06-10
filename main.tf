@@ -21,6 +21,7 @@ resource "azurerm_app_service_plan" "gs" {
   name                = "azurerm_service_plan"
   location            = azurerm_resource_group.gs.location
   resource_group_name = azurerm_resource_group.gs.name
+  reserved            = true 
   sku {
     tier = "Free"
     size = "F1"
