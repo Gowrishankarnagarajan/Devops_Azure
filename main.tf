@@ -17,23 +17,19 @@ resource "azurerm_resource_group" "gs" {
 }
 
 # Use the new resource type
-resource "azurerm_app_service_plan" "gs" {
+resource "azurerm_service_plan" "gs" {
   name                = "azurerm_service_plan"
   location            = azurerm_resource_group.gs.location
   resource_group_name = azurerm_resource_group.gs.name
-  reserved            = true 
-  sku {
-    tier = "Free"
-    size = "F1"
-  }
-  kind = "Linux"
+  os_type             = "Linux"
+  sku_name            = "F1"
 }
 
 resource "azurerm_linux_web_app" "frontend" {
   name                = "frontend-webapp-${random_id.frontend.hex}"
   location            = azurerm_resource_group.gs.location
   resource_group_name = azurerm_resource_group.gs.name
-  service_plan_id     = azurerm_app_service_plan.gs.id
+  service_plan_id     = azurerm_service_plan.gs.id
 
   site_config {
     always_on = false
@@ -43,7 +39,7 @@ resource "azurerm_linux_web_app" "backend" {
   name                = "backend-webapp-${random_id.backend.hex}"
   location            = azurerm_resource_group.gs.location
   resource_group_name = azurerm_resource_group.gs.name
-  service_plan_id     = azurerm_app_service_plan.gs.id
+  service_plan_id     = azurerm_service_plan.gs.id
 
   site_config {
     always_on = false
