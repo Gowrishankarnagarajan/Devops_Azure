@@ -1,3 +1,15 @@
+terraform { 
+  cloud { 
+    
+    organization = "gs-devops" 
+
+    workspaces { 
+      name = "Devops" 
+    } 
+  } 
+}
+
+
 provider "azurerm" {
   features {}
 }
