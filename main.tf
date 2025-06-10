@@ -17,46 +17,38 @@ resource "azurerm_resource_group" "gs" {
 }
 
 # Use the new resource type
-resource "azurerm_app_service_plan" "gs" {
+resource "azurerm_service_plan" "gs" {
   name                = "azurerm_service_plan"
   location            = azurerm_resource_group.gs.location
   resource_group_name = azurerm_resource_group.gs.name
-  reserved            = true 
-  sku {
-    tier = "Free"
-    size = "F1"
-  }
-  kind = "Linux"
+  os_type             = "Linux"
+  sku_name            = "F1"
 }
 
-resource "azurerm_app_service" "frontend" {
+resource "azurerm_linux_web_app" "frontend" {
   name                = "frontend-webapp-${random_id.frontend.hex}"
   location            = azurerm_resource_group.gs.location
   resource_group_name = azurerm_resource_group.gs.name
-  app_service_plan_id = azurerm_app_service_plan.gs.id
-  
+  service_plan_id     = azurerm_service_plan.gs.id
 
-
-  app_settings = {
-    "WEBSITE_RUN_FROM_PACKAGE" = "1"
+  site_config {
+    always_on = false
   }
-
-  # Use only source_control for GitHub integration
-  source_control {
-    repo_url           = "https://github.com/Gowrishankarnagarajan/Invitation.git"
-    branch             = "main"
-    manual_integration = true
-  }
-}
-
-resource "azurerm_app_service" "backend" {
+} 
+resource "azurerm_linux_web_app" "backend" {
   name                = "backend-webapp-${random_id.backend.hex}"
   location            = azurerm_resource_group.gs.location
   resource_group_name = azurerm_resource_group.gs.name
-  app_service_plan_id = azurerm_app_service_plan.gs.id
+  service_plan_id     = azurerm_service_plan.gs.id
 
-  # Add deployment config if needed
+  site_config {
+    always_on = false
+  }
 }
+
+ 
+# Generate random IDs for unique web app names
+# This ensures that the web app names are unique across Azure.
 
 resource "random_id" "frontend" {
   byte_length = 4
