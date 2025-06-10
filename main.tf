@@ -34,7 +34,9 @@ resource "azurerm_app_service" "frontend" {
   location            = azurerm_resource_group.gs.location
   resource_group_name = azurerm_resource_group.gs.name
   app_service_plan_id = azurerm_app_service_plan.gs.id
-  
+  site_config {
+    linux_fx_version = "JAVA|11-java11"
+  }
 }
 
 resource "azurerm_app_service" "backend" {
@@ -44,6 +46,9 @@ resource "azurerm_app_service" "backend" {
   app_service_plan_id = azurerm_app_service_plan.gs.id
 
   # Add deployment config if needed
+  site_config {
+    linux_fx_version = "java|11-java11"
+  }
 }
 
 resource "random_id" "frontend" {
