@@ -29,21 +29,21 @@ resource "azurerm_app_service_plan" "gs" {
   kind = "Linux"
 }
 
-resource "azurerm_app_service" "frontend" {
+resource "azurerm_linux_web_app" "frontend" {
   name                = "frontend-webapp-${random_id.frontend.hex}"
   location            = azurerm_resource_group.gs.location
   resource_group_name = azurerm_resource_group.gs.name
-  app_service_plan_id = azurerm_app_service_plan.gs.id
+  service_plan_id = azurerm_app_service_plan.gs.id
   site_config {
-    linux_fx_version = "JAVA|11-java11"
+    linux_fx_version = "wordpress|6.0"
   }
 }
 
-resource "azurerm_app_service" "backend" {
+resource "azurerm_linux_web_app" "backend" {
   name                = "backend-webapp-${random_id.backend.hex}"
   location            = azurerm_resource_group.gs.location
   resource_group_name = azurerm_resource_group.gs.name
-  app_service_plan_id = azurerm_app_service_plan.gs.id
+  service_plan_id = azurerm_app_service_plan.gs.id
 
   # Add deployment config if needed
   site_config {
