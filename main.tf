@@ -59,10 +59,11 @@ resource "random_id" "backend" {
 } 
 # Output the web app URLs
 output "frontend_web_app_url" {
-  value = azurerm_linux_web_app.frontend.default_site_hostname
-}   
+  value = azurerm_linux_web_app.frontend.default_hostname
+}
+
 output "backend_web_app_url" {
-  value = azurerm_linux_web_app.backend.default_site_hostname
+  value = azurerm_linux_web_app.backend.default_hostname
 }
 # Output the resource group name
 output "resource_group_name" {
