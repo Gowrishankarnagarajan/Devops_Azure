@@ -1,28 +1,41 @@
+variable "prefix" {
+  description = "Prefix for resource names"
+  default     = "gs"
+  type =  string
+  
+}
 
-resource "azurerm_resource_group" "gs" {
-  name     = "example-webapp-rg"
+
+resource "azurerm_resource_group" "rg" {
+  name     = "${var.prefix}-rg"
   location = "West Europe"
 }
 
 # Use the new resource type
-resource "azurerm_service_plan" "gs" {
+resource "azurerm_service_plan" "asp" {
   name                = "azurerm_service_plan"
-  location            = azurerm_resource_group.gs.location
-  resource_group_name = azurerm_resource_group.gs.name
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
   os_type             = "Linux"
   sku_name            = "F1"
 }
 
-resource "azurerm_linux_web_app" "frontend" {
-  name                = "frontend-webapp-${random_id.frontend.hex}"
-  location            = azurerm_resource_group.gs.location
-  resource_group_name = azurerm_resource_group.gs.name
-  service_plan_id     = azurerm_service_plan.gs.id
+resource "azurerm_linux_web_app" "as1" {
+  name                = "${var.prefix}-webapp"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  service_plan_id     = azurerm_service_plan.asp.id
 
   site_config {
-    always_on = false
-  }
+     }
 } 
+
+resource "azurerm_app_service_source_control" "scm" {
+  app_id            = azurerm_linux_web_app.as1.id
+  branch            = "main"
+  repo_url          = "https://github.com/Gowrishankarnagarajan/Invitation"
+  
+}
 resource "azurerm_linux_web_app" "backend" {
   name                = "backend-webapp-${random_id.backend.hex}"
   location            = azurerm_resource_group.gs.location
@@ -35,33 +48,3 @@ resource "azurerm_linux_web_app" "backend" {
 }
 
  
-# Generate random IDs for unique web app names
-# This ensures that the web app names are unique across Azure.
-
-resource "random_id" "frontend" {
-  byte_length = 4
-}
-
-resource "random_id" "backend" {
-  byte_length = 4
-} 
-# Output the web app URLs
-output "frontend_web_app_url" {
-  value = azurerm_linux_web_app.frontend.default_hostname
-}
-
-output "backend_web_app_url" {
-  value = azurerm_linux_web_app.backend.default_hostname
-}
-# Output the resource group name
-output "resource_group_name" {
-  value = azurerm_resource_group.gs.name
-} 
-# Output the service plan ID
-output "service_plan_id" {
-  value = azurerm_service_plan.gs.id
-}
-# Output the location of the resource group
-output "resource_group_location" {
-  value = azurerm_resource_group.gs.location
-}   
