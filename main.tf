@@ -1,15 +1,3 @@
-# This Terraform configuration sets up an Azure App Service with a resource group, app service plan, and two web apps (frontend and backend).
-terraform { 
-  cloud { 
-    
-    organization = "gs-devops" 
-
-    workspaces { 
-      name = "Devops" 
-    } 
-  } 
-}
-
 
 resource "azurerm_resource_group" "gs" {
   name     = "example-webapp-rg"
