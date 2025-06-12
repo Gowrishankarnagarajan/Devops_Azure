@@ -28,7 +28,7 @@ resource "azurerm_app_service_source_control" "scm" {
   repo_url          = "https://github.com/Gowrishankarnagarajan/Invitation"
   
 }
-resource "azurerm_linux_web_app" "aps2" {
+resource "azurerm_linux_web_app" "as2" {
   name                = "${var.prefix}-webapp2"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
