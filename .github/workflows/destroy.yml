@@ -10,8 +10,6 @@ on:
       - completed
 
 jobs:
-
-  jobs:
   terraform:
     name: Terraform Destroy
     runs-on: ubuntu-latest
