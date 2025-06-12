@@ -19,6 +19,9 @@ resource "azurerm_linux_web_app" "as1" {
   service_plan_id     = azurerm_service_plan.asp.id
 
   site_config {
+
+    always_on = false
+
      }
 } 
 
@@ -35,7 +38,7 @@ resource "azurerm_linux_web_app" "as2" {
   service_plan_id     = azurerm_service_plan.asp.id
 
   site_config {
- 
+    always_on = false
   }
 }
 
