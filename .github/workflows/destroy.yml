@@ -1,24 +1,17 @@
 name: Terraform Destroy Azure Resources
 
 on:
-  push:
-    branches:
-      - main
 
   workflow_run:
+    branches:
+      - main
     workflows: ["Terraform Azure WebApp CI/CD"]
     types:
       - completed
 
 jobs:
-  wait_10_Minutes:
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Wait for 10 Minutes
-        run: sleep $((10 * 60))
-       # run: sleep $((2 * 60 * 60))
 
+  jobs:
   terraform:
     name: Terraform Destroy
     runs-on: ubuntu-latest
