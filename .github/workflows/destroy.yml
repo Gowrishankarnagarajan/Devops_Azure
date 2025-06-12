@@ -1,6 +1,10 @@
 name: Terraform Destroy Azure Resources
 
 on:
+  push:
+    branches:
+      - main
+
   workflow_run:
     workflows: ["Terraform Azure WebApp CI/CD"]
     types:
