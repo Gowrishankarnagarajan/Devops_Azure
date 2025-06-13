@@ -5,7 +5,7 @@ resource "azurerm_resource_group" "rg" {
 
 # Use the new resource type
 resource "azurerm_service_plan" "asp" {
-  name                = "azurerm_service_plan"
+  name                = "${var.prefix}-asp"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   os_type             = "Linux"
@@ -17,7 +17,7 @@ resource "azurerm_linux_web_app" "as1" {
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   service_plan_id     = azurerm_service_plan.asp.id
-
+  depends_on = [ azurerm_resource_group.rg,azurerm_service_plan.asp ]
   site_config {
 
     always_on = false
@@ -36,7 +36,7 @@ resource "azurerm_linux_web_app" "as2" {
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   service_plan_id     = azurerm_service_plan.asp.id
-
+  depends_on = [ azurerm_resource_group.rg,azurerm_service_plan.asp ]
   site_config {
     always_on = false
   }
