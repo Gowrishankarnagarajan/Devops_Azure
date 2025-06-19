@@ -22,8 +22,9 @@ resource "azurerm_service_plan" "asp" {
   depends_on          = [azurerm_resource_group.rg]
 }
 
-resource "azurerm_linux_web_app" "webapp" {
-  name                = "${var.prefix}-webapp"
+# Frontend App Service
+resource "azurerm_linux_web_app" "frontend" {
+  name                = "${var.prefix}-frontend"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   service_plan_id     = azurerm_service_plan.asp.id
@@ -31,21 +32,44 @@ resource "azurerm_linux_web_app" "webapp" {
 
   site_config {
     always_on = false
-    linux_fx_version = "NODE|18-lts" # Set runtime based on your app type
+    linux_fx_version = "NODE|18-lts"  # Adjust based on frontend framework
     app_command_line = "pm2 serve /home/site/wwwroot --no-daemon"
   }
 }
 
-resource "azurerm_app_service_source_control" "scm" {
-  app_id   = azurerm_linux_web_app.webapp.id
-  branch   = "main"
-  repo_url = "https://github.com/Gowrishankarnagarajan/Invitation"
+# Backend App Service
+resource "azurerm_linux_web_app" "backend" {
+  name                = "${var.prefix}-backend"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  service_plan_id     = azurerm_service_plan.asp.id
+  depends_on          = [azurerm_service_plan.asp]
 
-  github_action_configuration {
-    code_configuration {
-      runtime_stack = "NODE|18-lts"
-    }
+  site_config {
+    always_on = false
+    linux_fx_version = "NODE|18-lts"  # Modify if using Python, .NET, etc.
   }
 
-  depends_on = [azurerm_linux_web_app.webapp]
+  app_settings = {
+    "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "true"
+    "API_BASE_URL" = "https://${var.prefix}-frontend.azurewebsites.net"
+  }
+}
+
+# Source Control for Frontend (GitHub Deployment)
+resource "azurerm_app_service_source_control" "frontend_scm" {
+  app_id   = azurerm_linux_web_app.frontend.id
+  branch   = "main"
+  repo_url = "https://github.com/Gowrishankarnagarajan/frontend-repo"
+
+  depends_on = [azurerm_linux_web_app.frontend]
+}
+
+# Source Control for Backend (GitHub Deployment)
+resource "azurerm_app_service_source_control" "backend_scm" {
+  app_id   = azurerm_linux_web_app.backend.id
+  branch   = "main"
+  repo_url = "https://github.com/Gowrishankarnagarajan/backend-repo"
+
+  depends_on = [azurerm_linux_web_app.backend]
 }
