@@ -3,6 +3,19 @@ resource "azurerm_resource_group" "rg" {
   location = "UK South"
 }
 
+data "azurerm_client_config" "current" {}
+
+# Data source to get the current Azure client configuration
+resource "azurerm_key_vault" "kv" {
+  name                        = "${var.prefix}-kv"
+  location                    = azurerm_resource_group.rg.location
+  resource_group_name         = azurerm_resource_group.rg.name
+  tenant_id                   = data.azurerm_client_config.current.tenant_id
+  sku_name                    = "standard"
+  purge_protection_enabled    = true
+}
+
+
 # Use the new resource type
 resource "azurerm_service_plan" "asp" {
   name                = "${var.prefix}-asp"
