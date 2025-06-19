@@ -12,7 +12,7 @@ resource "random_id" "kv" {
 # It uses the current Azure client configuration to set the tenant ID and other properties.
 # Data source to get the current Azure client configuration
 resource "azurerm_key_vault" "keyvault" {
-  name                        = "${var.prefix}-keyvault"-"${random_id.kv.hex}"
+  name                        = "${var.prefix}-keyvault-${random_id.kv.hex}"
   # Ensure the name is globally unique by appending a random ID
   location                    = azurerm_resource_group.rg.location
   resource_group_name         = azurerm_resource_group.rg.name
