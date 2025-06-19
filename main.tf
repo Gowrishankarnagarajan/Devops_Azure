@@ -8,7 +8,7 @@ data "azurerm_client_config" "current" {}
 resource "random_id" "kv" {
   byte_length = 4
 }
-# This Terraform configuration sets up an Azure Key Vault with purge protection enabled.
+# This Terraform configuration sets up an Azure Key Vault with purge protection enabled..
 # It uses the current Azure client configuration to set the tenant ID and other properties.
 # Data source to get the current Azure client configuration
 resource "azurerm_key_vault" "keyvault" {
