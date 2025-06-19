@@ -6,7 +6,7 @@ resource "azurerm_resource_group" "rg" {
 data "azurerm_client_config" "current" {}
 
 # Data source to get the current Azure client configuration
-resource "azurerm_key_vault" "kv" {
+resource "azurerm_key_vault" "keyvault" {
   name                        = "${var.prefix}-keyvault"
   location                    = azurerm_resource_group.rg.location
   resource_group_name         = azurerm_resource_group.rg.name
