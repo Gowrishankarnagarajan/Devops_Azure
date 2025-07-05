@@ -1,59 +1,95 @@
+terraform {
+  required_providers {
+    azurerm = { source = "hashicorp/azurerm" version = "~>3.0" }
+    random  = { source = "hashicorp/random" version = "~>3.0" }
+  }
+}
+
+provider "azurerm" {
+  features {}
+}
+
+# 🎯 Variables
+variable "prefix" {
+  type    = string
+  default = "sample"
+}
+
+# 1. Resource Group
 resource "azurerm_resource_group" "rg" {
   name     = "${var.prefix}-rg"
   location = "UK South"
 }
 
-data "azurerm_client_config" "current" {}
-
-resource "random_id" "kv" {
+resource "random_id" "suffix" {
   byte_length = 4
 }
-# This Terraform configuration sets up an Azure Key Vault with purge protection enabled.
-# It uses the current Azure client configuration to set the tenant ID and other properties.
-# Data source to get the current Azure client configuration
-resource "azurerm_key_vault" "keyvault" {
-  name                        = "${var.prefix}-keyvault-${random_id.kv.hex}"
-  # Ensure the name is globally unique by appending a random ID
-  location                    = azurerm_resource_group.rg.location
-  resource_group_name         = azurerm_resource_group.rg.name
-  tenant_id                   = data.azurerm_client_config.current.tenant_id
-  sku_name                    = "standard"
-  purge_protection_enabled    = true
+
+# 2. Storage Account + Container for deployment ZIP
+resource "azurerm_storage_account" "sa" {
+  name                     = "${var.prefix}sa${random_id.suffix.hex}"
+  resource_group_name      = azurerm_resource_group.rg.name
+  location                 = azurerm_resource_group.rg.location
+  account_tier             = "Standard"
+  account_replication_type = "GRS"
+  account_kind             = "StorageV2"
 }
 
+resource "azurerm_storage_container" "deploy" {
+  name                  = "deploy"
+  storage_account_name  = azurerm_storage_account.sa.name
+  container_access_type = "private"
+}
 
-# Use the new resource type
+resource "azurerm_storage_blob" "appzip" {
+  name                   = "app_${random_id.suffix.hex}.zip"
+  storage_account_name   = azurerm_storage_account.sa.name
+  storage_container_name = azurerm_storage_container.deploy.name
+  type                   = "Block"
+  source                 = "${path.module}/app_build/app.zip"
+}
+
+# 3. App Service Plan
 resource "azurerm_service_plan" "asp" {
   name                = "${var.prefix}-asp"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   os_type             = "Linux"
   sku_name            = "B1"
-  depends_on = [ azurerm_resource_group.rg ]
 }
 
-resource "azurerm_linux_web_app" "as1" {
-  name                = "${var.prefix}-webapp1"
+# 4. Linux Web App
+resource "azurerm_linux_web_app" "app" {
+  name                = "${var.prefix}-webapp"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   service_plan_id     = azurerm_service_plan.asp.id
-  depends_on = [ azurerm_service_plan.asp ]
-  site_config {
+  https_only          = true
 
-    always_on = false
-    
-     }
-} 
+  identity {
+    type = "SystemAssigned"
+  }
 
-resource "azurerm_linux_web_app" "as2" {
-  name                = "${var.prefix}-webapp2"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-  service_plan_id     = azurerm_service_plan.asp.id
-  depends_on = [ azurerm_service_plan.asp ]
   site_config {
-    always_on = false
+    application_stack {
+      node_version = "16-lts"
+    }
+  }
+
+  app_settings = {
+    # Tell App Service to mount and run from the ZIP in storage
+    WEBSITE_RUN_FROM_PACKAGE = azurerm_storage_blob.appzip.url
   }
 }
 
- 
+# 5. Grant Web App permission to read the package
+resource "azurerm_role_assignment" "webapp_storage_read" {
+  principal_id         = azurerm_linux_web_app.app.identity[0].principal_id
+  role_definition_name = "Storage Blob Data Reader"
+  scope                = azurerm_storage_blob.appzip.id
+}
+
+# 🛠 Outputs
+output "webapp_url" {
+  value = azurerm_linux_web_app.app.default_hostname
+}
